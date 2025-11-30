@@ -1,0 +1,17 @@
+Treatment,Female mating status,X label,Strategy,Mean,95 _CI_min,95 _CI_max
+Across bush,virgin,Silent,Silent,0.03846154,0,0.1153846
+Across bush,virgin,Satellite with Caller,Silent,0.06451613,0,0.1612903
+Across bush,virgin,Caller,Calling,0.4594595,0.2972973,0.6216216
+Across bush,virgin,Caller with Satellite,Calling,0.2258065,0.09677419,0.38709677
+Within bush,virgin,Silent,Silent,0.3,0.1333333,0.4666667
+Within bush,virgin,Satellite with Caller,Silent,0.3947368,0.2368421,0.5526316
+Within bush,virgin,Satellite with Baffler,Silent,0.3611111,0.2039351,0.5182871
+Within bush,virgin,Caller,Calling,0.5,0.3478261,0.6521739
+Within bush,virgin,Caller with Satellite,Calling,0.4210526,0.2631579,0.5789474
+Within bush,virgin,Baffler with Satellite,Calling,0.4722222,0.3081015,0.6363429
+Across bush baffler,virgin,Caller,Calling,0,0,0
+Across bush baffler,virgin,Baffler,Calling,0.7307692,0.5618602,0.8996782
+Within bush,mated,Silent,Silent,0,0,0
+Within bush,mated,Satellite with Caller,Silent,0.1428571,0,0.3571429
+Within bush,mated,Caller,Calling,0.2380952,0.04761905,0.42857143
+Within bush,mated,Caller with Satellite,Calling,0.07142857,0,0.2142857
