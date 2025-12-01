@@ -10,7 +10,7 @@ Alternative reproductive tactics are observed in many animal species. Typically,
 
 ## Guide to the Repository
 
--   The `code.R` (v1.4, manual version number) Rscript contains the entire R code that was used for the analysis and visualization of the data in the associated manuscript. More about the code and its execution later.
+-   The `code.R` (v1.5, manual version number) Rscript contains the entire R code that was used for the analysis and visualization of the data in the associated manuscript. More about the code and its execution later.
 
 -   The `data_virgin_female_same_bush.csv` file contains the data for the within-bush experimental trials conducted to estimate the mating success of callers, satellites, and silent males when virgin females were used. Call effort data for figure S2 in supplementary document is extracted from this dataset. Data for parts of figures 3a and 3b is contained in this file.
 
@@ -51,7 +51,7 @@ Alternative reproductive tactics are observed in many animal species. Typically,
 
 -   Executing the entire `code.R` script (one way is to click 'Source' in RStudio) would import data from the .CSV files in the folder and conduct the analyses required to estimate the mating success for our experimental paradigms and also conduct other supplementary analyses.
 -   Two folders are created as a result of running the entire script:
-    -   The ***output*** folder, which will contain six .CSV files: `chi_square_tests.csv` which contains the results ($\chi^2$, df, and p-values) for the chi-square tests, `confidence_intervals.csv` which contains the bootstrapped 95% confidence intervals (calculated during that run of the code) for the mating success of each of the male reproductive tactics (treatments), and four files, namely, `table1/2/3/S1.csv` containing the binomial GLM results of their respective counterparts in the manuscript.
+    -   The ***output*** folder, which will contain five .CSV files: `confidence_intervals.csv` which contains the bootstrapped 95% confidence intervals (calculated during that run of the code) for the mating success of each of the male reproductive tactics (treatments), and four files, namely, `table1/2/3/S1.csv` containing the binomial GLM results of their respective counterparts in the manuscript.
     -   The ***plots*** folder, which will contain .PNG figures with names corresponding to the figures in the associated manuscript and supplementary material.
 
 ## 
