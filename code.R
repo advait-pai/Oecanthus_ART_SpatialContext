@@ -4,10 +4,12 @@ of male crickets in various spatio-acoustic scenarios.
 
 Click Source in RStudio to run the entire script.
 
+Manual Version Number: v1.5
+
 Input: 13 .csv files containing data from experimental trials and 4 .csv files 
 for supplementary results
 
-Output: 6 .csv files containing chi-square test results, 95% bootstrapped confidence intervals, 
+Output: 5 .csv files containing 95% bootstrapped confidence intervals, 
 the four GLM result tables (1, 2, 3, S1), and a folder containing plots"
 
 #### Importing relevant libraries and setting working directory ####
@@ -86,87 +88,7 @@ total_call_non_repeating_males <- sum(data_single_male_non_repeating_males$tacti
 
 mate_call_with_sat_non_repeating_males <- sum(data_two_males_caller_non_repeating_males$mated == '1' & data_two_males_caller_non_repeating_males$tactic == 'call')
 total_call_with_sat_non_repeating_males <- sum(data_two_males_caller_non_repeating_males$tactic == 'call')
-## Results: Chi-Square Tests (Within-Bush) ####
 
-# Comparing Silent and Satellite males (of non-baffling callers)
-df_silent_males <- data.frame( # creating a contingency table
-  mated= c(mate_silent, mate_sat_with_cal),
-  unmated = c(total_silent - mate_silent, total_sat_with_cal - mate_sat_with_cal),
-  row.names = c("Silent", "Satellite With Callers"),
-  stringsAsFactors = FALSE
-)
-chisq.test(df_silent_males) # Chi-square test to compare the mating success
-
-
-# # Comparing Silent and Satellite males (of non-baffling callers) for naive males only
-df_silent_males_non_repeating_males <- data.frame( # creating a contingency table
-  mated= c(mate_silent_non_repeating_males, mate_sat_with_cal_non_repeating_males ),
-  unmated = c(total_silent_non_repeating_males - mate_silent_non_repeating_males, total_sat_with_cal_non_repeating_males  - mate_sat_with_cal_non_repeating_males),
-  row.names = c("Silent", "Satellite With Callers"),
-  stringsAsFactors = FALSE
-)
-chisq.test(df_silent_males_non_repeating_males) # Chi-square test to compare the mating success
-
-# Comparing Satellites of (non-baffling) Callers vs Satellites of Baffler
-df_satellite_males <- data.frame( # creating a contingency table
-  mated = c(mate_sat_with_cal, mate_sat_with_baf),
-  unmated = c(total_sat_with_cal - mate_sat_with_cal, total_sat_with_baf - mate_sat_with_baf),
-  row.names = c("Satellite with Caller", "Satellite With Baffler"),
-  stringsAsFactors = FALSE
-)
-
-chisq.test(df_satellite_males) # Chi-square test to compare the mating success
-
-# Comparing Callers vs Callers with Satellite
-df_callers <- data.frame( # creating a contingency table
-  mated = c(mate_call, mate_call_with_sat),
-  unmated = c(total_call - mate_call, total_call_with_sat - mate_call_with_sat),
-  row.names = c("Caller", "Caller With Satellite"),
-  stringsAsFactors = FALSE
-)
-
-chisq.test(df_callers) # Chi-square test to compare the mating success
-
-# Comparing Callers vs Callers with Satellite (for naive males only)
-df_callers_non_repeating_males <- data.frame( # creating a contingency table
-  mated = c(mate_call_non_repeating_males, mate_call_with_sat_non_repeating_males),
-  unmated = c(total_call_non_repeating_males - mate_call_non_repeating_males, total_call_with_sat_non_repeating_males - mate_call_with_sat_non_repeating_males),
-  row.names = c("Caller", "Caller With Satellite"),
-  stringsAsFactors = FALSE
-)
-
-chisq.test(df_callers_non_repeating_males) # Chi-square test to compare the mating success
-
-
-# Comparing Bafflers vs Satellites of Bafflers
-df_baff_vs_satellite <- data.frame( # creating a contingency table
-  mated = c(mate_baff_with_sat, mate_sat_with_baf),
-  unmated = c(total_baff_with_sat - mate_baff_with_sat, total_sat_with_baf - mate_sat_with_baf),
-  row.names = c("Caller", "Caller With Satellite"),
-  stringsAsFactors = FALSE
-)
-
-chisq.test(df_baff_vs_satellite) # Chi-square test to compare the mating success
-
-# Comparing Caller vs Baffler
-df_call_vs_baff <- data.frame( # creating a contingency table
-  mated = c(mate_call_with_sat, mate_baff_with_sat),
-  unmated = c(total_call_with_sat - mate_call_with_sat, total_baff_with_sat - mate_baff_with_sat),
-  row.names = c("Call", "Baffler"),
-  stringsAsFactors = FALSE
-)
-
-chisq.test(df_call_vs_baff) # Chi-square test to compare the mating success
-
-# Comparing Callers and Silent males
-df_call_vs_silent <- data.frame( # creating a contingency table
-  mated = c(mate_call, mate_silent),
-  unmated = c(total_call - mate_call, total_silent - mate_silent),
-  row.names = c("Caller", "Silent"),
-  stringsAsFactors = FALSE
-)
-
-chisq.test(df_call_vs_silent) # Chi-square test to compare the mating success
 
 ## Results: Bootstrapping 10000 times to obtain 95% confidence intervals (Within-Bush) ####
 
@@ -301,28 +223,6 @@ results_table_M <- data.frame(
   )
 )
 
-# Chi-square tests
-
-# Comparing Silent and Satellite males (of non-baffling callers) with mated females
-df_silent_males_M <- data.frame( # creating a contingency table
-  mated= c(mate_silent_M, mate_sat_with_cal_M),
-  unmated = c(total_silent_M - mate_silent_M, total_sat_with_cal_M - mate_sat_with_cal_M),
-  row.names = c("Silent", "Satellite With Callers"),
-  stringsAsFactors = FALSE
-)
-
-chisq.test(df_silent_males_M) # Chi-square test to compare the mating success
-
-# Comparing Callers vs Callers with Satellite with mated females
-df_callers_M <- data.frame( # creating a contingency table
-  mated = c(mate_call_M, mate_call_with_sat_M),
-  unmated = c(total_call_M - mate_call_M, total_call_with_sat_M - mate_call_with_sat_M),
-  row.names = c("Caller", "Caller With Satellite"),
-  stringsAsFactors = FALSE
-)
-
-chisq.test(df_callers_M) # Chi-square test to compare the mating success
-
 
 # Bootstrapping to get confidence intervals
 
@@ -412,42 +312,6 @@ total_call_with_sat_across <- sum(data_two_males_caller_across$tactic == 'call')
 mate_baff_with_cal_across <- sum(data_two_males_baffler_across$mated == '1' & data_two_males_baffler_across$tactic == 'baffling')
 total_baff_with_cal_across <- sum(data_two_males_baffler_across$tactic == 'baffling')
 
-
-## Results: Chi-Square Tests (Across-Bush) ####
-
-# Comparing Silent and Satellite males (of non-baffling callers)
-df_silent_males_across <- data.frame( # creating a contingency table
-  mated= c(mate_silent_across, mate_sat_with_cal_across),
-  unmated = c(total_silent_across - mate_silent_across, total_sat_with_cal_across - mate_sat_with_cal_across),
-  row.names = c("Silent", "Satellite With Callers"),
-  stringsAsFactors = FALSE
-)
-
-chisq.test(df_silent_males_across) # Chi-square test to compare the mating success
-
-# Comparing Callers vs Callers with Satellite
-df_callers_across <- data.frame( # creating a contingency table
-  mated = c(mate_call_across, mate_call_with_sat_across),
-  unmated = c(total_call_across - mate_call_across, total_call_with_sat_across - mate_call_with_sat_across),
-  row.names = c("Caller", "Caller With Satellite"),
-  stringsAsFactors = FALSE
-)
-
-chisq.test(df_callers_across) # Chi-square test to compare the mating success
-
-# Comparing Silent and Lone Calling males
-df_call_vs_silent_across <- data.frame( # creating a contingency table
-  mated = c(mate_call_across, mate_silent_across),
-  unmated = c(total_call_across - mate_call_across, total_silent_across - mate_silent_across),
-  row.names = c("Caller", "Silent"),
-  stringsAsFactors = FALSE
-)
-
-chisq.test(df_call_vs_silent_across) # Chi-square test to compare the mating success
-
-# Comparing Caller vs Baffler (proportion test/chi-square test)
-PT_call_vs_baff_across <- prop.test(c(mate_cal_with_baf_across,mate_baff_with_cal_across),
-                                    c(total_baff_with_cal_across,total_baff_with_cal_across))
 
 ## Results: Bootstrapping 10000 times to obtain 95% confidence intervals (Across-Bush) ####
 
@@ -1298,101 +1162,6 @@ lm.baffprop <- lm(baff_probability~Body_Length_mm, data = baff_prop)
 ggsave("./plots/figS14.png", plot = plot_baff_prop , width = 10, height = 7)
 
 ### Exporting output as .CSV files ####
-
-# Compile chi-square test results in a table
-chi_square_results <- data.frame(
-  Setup = c(
-    "Within bush",
-    "Within bush",
-    "Within bush",
-    "Within bush",
-    "Within bush",
-    "Within bush",
-    "Within bush",
-    "Within bush",
-    "Across bush",
-    "Across bush",
-    "Across bush",
-    "Across bush"
-    
-  ),
-  Comparison = c(
-    "Silent vs Satellite with Callers",
-    "Satellites of Callers vs Satellites of Bafflers",
-    "Callers vs Callers with Satellites",
-    "Bafflers vs Satellites of Bafflers",
-    "Callers vs Bafflers",
-    "Silent vs Satellite with Callers",
-    "Callers vs Callers with Satellites",
-    "Silent vs Callers",
-    "Silent vs Satellite with Callers",
-    "Callers vs Callers with Satellites",
-    "Silent vs Callers",
-    "Bafflers vs Callers"
-    
-  ),
-  Female_Status = c(
-    "Virgin",
-    "Virgin",
-    "Virgin",
-    "Virgin",
-    "Virgin",
-    "Mated",
-    "Mated",
-    "Virgin",
-    "Virgin",
-    "Virgin",
-    "Virgin",
-    "Virgin"
-    
-  ),
-  chi_square = c(
-    chisq.test(df_silent_males)$statistic,
-    chisq.test(df_satellite_males)$statistic,
-    chisq.test(df_callers)$statistic,
-    chisq.test(df_baff_vs_satellite)$statistic,
-    chisq.test(df_call_vs_baff)$statistic,
-    chisq.test(df_silent_males_M)$statistic,
-    chisq.test(df_callers_M)$statistic,
-    chisq.test(df_call_vs_silent)$statistic,
-    chisq.test(df_silent_males_across)$statistic,
-    chisq.test(df_callers_across)$statistic,
-    chisq.test(df_call_vs_silent_across)$statistic,
-    PT_call_vs_baff_across$statistic
-    
-  ),
-  df = c(
-    chisq.test(df_silent_males)$parameter,
-    chisq.test(df_satellite_males)$parameter,
-    chisq.test(df_callers)$parameter,
-    chisq.test(df_baff_vs_satellite)$parameter,
-    chisq.test(df_call_vs_baff)$parameter,
-    chisq.test(df_silent_males_M)$parameter,
-    chisq.test(df_callers_M)$parameter,
-    chisq.test(df_call_vs_silent)$parameter,
-    chisq.test(df_silent_males_across)$parameter,
-    chisq.test(df_callers_across)$parameter,
-    chisq.test(df_call_vs_silent_across)$parameter,
-    PT_call_vs_baff_across$parameter
-  ),
-  p_value = c(
-    chisq.test(df_silent_males)$p.value,
-    chisq.test(df_satellite_males)$p.value,
-    chisq.test(df_callers)$p.value,
-    chisq.test(df_baff_vs_satellite)$p.value,
-    chisq.test(df_call_vs_baff)$p.value,
-    chisq.test(df_silent_males_M)$p.value,
-    chisq.test(df_callers_M)$p.value,
-    chisq.test(df_call_vs_silent)$p.value,
-    chisq.test(df_silent_males_across)$p.value,
-    chisq.test(df_callers_across)$p.value,
-    chisq.test(df_call_vs_silent_across)$p.value,
-    PT_call_vs_baff_across$p.value
-  ),
-  stringsAsFactors = FALSE
-)
-
-write.csv(chi_square_results, "./output/chi_square_tests.csv",append = FALSE)
 
 # Changing column names for exporting the .CSV file with confidence intervals
 colnames(within_bush_bootstrap_CI) <- c(
