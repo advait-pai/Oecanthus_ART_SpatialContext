@@ -4,13 +4,13 @@ of male crickets in various spatio-acoustic scenarios.
 
 Click Source in RStudio to run the entire script.
 
-Manual Version Number: v1.5
+Manual Version Number: v1.6
 
-Input: 13 .csv files containing data from experimental trials and 4 .csv files 
-for supplementary results
+Input: 15 .csv files containing data from experimental trials 
 
-Output: 5 .csv files containing 95% bootstrapped confidence intervals, 
-the four GLM result tables (1, 2, 3, S1), and a folder containing plots"
+Output: A folder ('output') that includes 10 .csv files containing 95% bootstrapped
+confidence intervals, the seven GLM result tables (1, 2, 3, 4, 5, 6, 7), and the results 
+for the paired t-tests and proportion tests, and a folder containing plots"
 
 #### Importing relevant libraries and setting working directory ####
 # install.packages(c("tidyverse", "MASS", "EnvStats", "ggplot2", "glmmTMB", "lme4", "car", "emmeans")
@@ -22,6 +22,8 @@ library(glmmTMB)
 library(lme4)
 library(car)
 library(emmeans)
+library (patchwork)
+
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set working directory to the folder the code is in
 
 
@@ -41,7 +43,7 @@ if (!dir.exists(folder_name)) {
 
 # Main data importing for within bush, virgin female experiments
 data_virgin_female_same_bush <- read.csv('data_virgin_female_same_bush.csv')
-data_virgin_female_same_bush_without_repeating_males <- read.csv('data_summary_virgin_female_same_bush_wo_repeating_males.csv')
+# data_virgin_female_same_bush_without_repeating_males <- read.csv('data_summary_virgin_female_same_bush_wo_repeating_males.csv')
 data_virgin_female_same_bush_baffler <- read.csv('data_virgin_female_same_bush_baffler.csv')
 
 # Subset the data to include only a particular treatment 
@@ -50,10 +52,11 @@ data_single_male <- data_virgin_female_same_bush %>%
 data_two_males_caller <- data_virgin_female_same_bush %>% 
   filter(treatment == 'two_males')  # two male treatment with callers
 data_two_males_baffler <- data_virgin_female_same_bush_baffler # two male treatment with bafflers
-data_single_male_non_repeating_males <- data_virgin_female_same_bush_without_repeating_males%>% 
-  filter(treatment == 'single_male') # single male treatment involving naive males only 
-data_two_males_caller_non_repeating_males <- data_virgin_female_same_bush_without_repeating_males%>% 
-  filter(treatment == 'two_male') # two male male treatment involving naive males only 
+
+# data_single_male_non_repeating_males <- data_virgin_female_same_bush_without_repeating_males%>% 
+  # filter(treatment == 'single_male') # single male treatment involving naive males only 
+# data_two_males_caller_non_repeating_males <- data_virgin_female_same_bush_without_repeating_males%>% 
+  # filter(treatment == 'two_male') # two male male treatment involving naive males only 
 
 ## Calculating mating success (Within-Bush) ####
 
@@ -76,18 +79,18 @@ total_call_with_sat<- sum(data_two_males_caller$tactic == 'call')
 mate_baff_with_sat <- sum(data_two_males_baffler$mated == '1' & data_two_males_baffler$tactic == 'baffling')
 total_baff_with_sat <- sum(data_two_males_baffler$tactic == 'baffling')
 
-# Counting number of successful matings and total trials for treatments involving only naive males
-mate_silent_non_repeating_males <- sum(data_single_male_non_repeating_males$mated == '1' & data_single_male_non_repeating_males$tactic == 'silent')
-total_silent_non_repeating_males <- sum(data_single_male_non_repeating_males$tactic == 'silent')
-
-mate_sat_with_cal_non_repeating_males <- sum(data_two_males_caller_non_repeating_males$mated == '1' & data_two_males_caller_non_repeating_males$tactic == 'silent')
-total_sat_with_cal_non_repeating_males <- sum(data_two_males_caller_non_repeating_males$tactic == 'silent')
-
-mate_call_non_repeating_males <- sum(data_single_male_non_repeating_males$mated == '1' & data_single_male_non_repeating_males$tactic == 'call')
-total_call_non_repeating_males <- sum(data_single_male_non_repeating_males$tactic == 'call')
-
-mate_call_with_sat_non_repeating_males <- sum(data_two_males_caller_non_repeating_males$mated == '1' & data_two_males_caller_non_repeating_males$tactic == 'call')
-total_call_with_sat_non_repeating_males <- sum(data_two_males_caller_non_repeating_males$tactic == 'call')
+# # Counting number of successful matings and total trials for treatments involving only naive males
+# mate_silent_non_repeating_males <- sum(data_single_male_non_repeating_males$mated == '1' & data_single_male_non_repeating_males$tactic == 'silent')
+# total_silent_non_repeating_males <- sum(data_single_male_non_repeating_males$tactic == 'silent')
+# 
+# mate_sat_with_cal_non_repeating_males <- sum(data_two_males_caller_non_repeating_males$mated == '1' & data_two_males_caller_non_repeating_males$tactic == 'silent')
+# total_sat_with_cal_non_repeating_males <- sum(data_two_males_caller_non_repeating_males$tactic == 'silent')
+# 
+# mate_call_non_repeating_males <- sum(data_single_male_non_repeating_males$mated == '1' & data_single_male_non_repeating_males$tactic == 'call')
+# total_call_non_repeating_males <- sum(data_single_male_non_repeating_males$tactic == 'call')
+# 
+# mate_call_with_sat_non_repeating_males <- sum(data_two_males_caller_non_repeating_males$mated == '1' & data_two_males_caller_non_repeating_males$tactic == 'call')
+# total_call_with_sat_non_repeating_males <- sum(data_two_males_caller_non_repeating_males$tactic == 'call')
 
 
 ## Results: Bootstrapping 10000 times to obtain 95% confidence intervals (Within-Bush) ####
@@ -501,9 +504,8 @@ summary_two_males_baffler_across <- data.frame(
   stringsAsFactors = FALSE
 )
 
-## Table 1 & 2: Results of the binomial GLM examining mating success of ARTs ####
 
-# Table 1: For Within-Bush experimental trials
+# Table 1: For Within-Bush experimental trials (Comparison between Silent vs Satellite) ####
 dataset <- read.csv("data_mating_success_all_tactics_same_bush.csv")
 dataset$tactic <- ifelse(dataset$tactic=='call','caller',dataset$tactic)
 dataset <- dataset %>%
@@ -515,14 +517,46 @@ dataset <- dataset %>%
     TRUE ~ tactic
   ))
 dataset$tactic <- as.factor (dataset$tactic)
-dataset$tactic <- relevel (dataset$tactic, ref = "silent")
-mod <- glm (mated~tactic,family = binomial, data=dataset)
-s <- summary(mod)
 
+df_silent_vs_satellite <- filter(dataset,tactic =='silent' | tactic=='satellite with caller' | tactic=='satellite with baffler') 
+df_signaller_vs_signaller_w_satellite <- filter(dataset,tactic =='caller' | tactic=='caller with satellite'  | tactic=='baffler with satellite' ) 
+
+df_silent_vs_satellite <- df_silent_vs_satellite %>%
+  left_join(
+    df_signaller_vs_signaller_w_satellite %>%
+      dplyr::select(exp_ids, partner_maleid = maleid),
+    by = "exp_ids"
+  )
+df_signaller_vs_signaller_w_satellite <- df_signaller_vs_signaller_w_satellite %>%
+  left_join(
+    df_silent_vs_satellite %>%
+      dplyr::select(exp_ids, partner_maleid = maleid),
+    by = "exp_ids"
+  )
+
+df_silent_vs_satellite$tactic <- factor(df_silent_vs_satellite$tactic,levels = c("silent", "satellite with caller", "satellite with baffler"))
+df_silent_vs_satellite$partner_maleid <- ifelse(df_silent_vs_satellite$tactic=='silent','no_partner',df_silent_vs_satellite$partner_maleid)
+mod <- glmer (mated~tactic + (1|maleid) + (1|partner_maleid)  ,family = binomial, data=df_silent_vs_satellite)
+summary(mod)
+
+mod <- glmer (mated~tactic + (1|maleid) ,family = binomial, data=df_silent_vs_satellite)
+summary(mod)
+s <- summary(mod)
 coef_table <- as.data.frame(s$coefficients)
 write.csv(coef_table, "./output/table1.csv", row.names = TRUE)
 
-# Table 2: For Across-Bush experimental trials
+# Table 2: For Within-Bush experimental trials (Comparison between callers; callers and bafflers in presence of satellite.) ####
+
+df_signaller_vs_signaller_w_satellite$tactic <- factor(df_signaller_vs_signaller_w_satellite$tactic,levels = c("caller", "caller with satellite", "baffler with satellite"))
+df_signaller_vs_signaller_w_satellite$partner_maleid <- ifelse(df_signaller_vs_signaller_w_satellite$tactic=='caller','no_partner',df_silent_vs_satellite$partner_maleid)
+mod2 <- glmer (mated~tactic+ (1|maleid) + (1|partner_maleid),family = binomial, data=df_signaller_vs_signaller_w_satellite)
+summary(mod2)
+mod2 <- glmer (mated~tactic+ (1|maleid),family = binomial, data=df_signaller_vs_signaller_w_satellite)
+s <- summary(mod2)
+coef_table <- as.data.frame(s$coefficients)
+write.csv(coef_table, "./output/table2.csv", row.names = TRUE)
+
+# Table 3: For Across-Bush experimental trials (Comparison of silent vs satellite) ####
 d1<- read.csv('data_across_bush_single_male.csv')
 d2 <- read.csv('data_across_bush_two_male.csv')
 dataset<- rbind(d1,d2)
@@ -540,17 +574,42 @@ dataset$tactic <- factor(dataset$tactic,
                                     "caller",
                                     "caller with satellite"))
 dataset$tactic <- as.factor (dataset$tactic)
-mod <- glm (mated~tactic,family = binomial, data=dataset)
+
+
+df_silent_vs_satellite <- filter(dataset,tactic =='silent' | tactic=='satellite with caller') 
+df_caller_vs_caller_w_satellite <- filter(dataset,tactic =='caller' | tactic=='caller with satellite')
+
+df_silent_vs_satellite <- df_silent_vs_satellite %>%
+  left_join(
+    df_caller_vs_caller_w_satellite %>%
+      dplyr::select(exp_ids, partner_maleid = maleid),
+    by = "exp_ids"
+  )
+df_caller_vs_caller_w_satellite <- df_caller_vs_caller_w_satellite %>%
+  left_join(
+    df_silent_vs_satellite %>%
+      dplyr::select(exp_ids, partner_maleid = maleid),
+    by = "exp_ids"
+  )
+
+df_silent_vs_satellite$partner_maleid <- ifelse(df_silent_vs_satellite$tactic=='silent','no_partner',df_silent_vs_satellite$partner_maleid )
+mod <- glmer (mated~ tactic + (1|maleid) + (1|partner_maleid),family = binomial, data=df_silent_vs_satellite) 
+summary (mod)
+mod <- glmer (mated~ tactic + (1|maleid),family = binomial, data=df_silent_vs_satellite)
 s <- summary(mod)
-# Anova(mod, type= 'III')
-
-# Post-hoc Tukey's test
-emmeans(mod, pairwise ~ tactic, adjust = "tukey") |>
-  contrast(method = list("caller vs caller_with_satellite" = c(0, 0, 1, -1)))
-
 coef_table <- as.data.frame(s$coefficients)
-write.csv(coef_table, "./output/table2.csv", row.names = TRUE)
+write.csv(coef_table, "./output/table3.csv", row.names = TRUE)
 
+
+# Table 4: For Across-Bush experimental trials (Comparison of caller vs caller with satellite) ####
+df_caller_vs_caller_w_satellite$partner_maleid <- ifelse(df_caller_vs_caller_w_satellite$tactic=='caller','no_partner',df_caller_vs_caller_w_satellite$partner_maleid) 
+mod <- glmer (mated~tactic + (1|maleid) + (1|partner_maleid),family = binomial, data=df_caller_vs_caller_w_satellite)
+summary (mod)
+mod <- glmer (mated~tactic + (1|maleid),family = binomial, data=df_caller_vs_caller_w_satellite)
+
+s <- summary(mod)
+coef_table <- as.data.frame(s$coefficients)
+write.csv(coef_table, "./output/table4.csv", row.names = TRUE)
 
 ### Importing data for plots ####
 # Creating a master dataframe with all the 95% confidence interval data
@@ -704,6 +763,22 @@ plot_baff_across <- dat_baff_across %>%
 
 ggsave("./plots/fig5a.png", plot = plot_baff_across , width = 10, height = 7)
 
+# GLMM to compare the mating success of bafflers and callers in across-bush experiments
+mod <- glmer (mated~tactic + (1|maleid), family = binomial, data=data_two_males_baffler_across)
+# summary(mod)
+s <- summary(mod)
+coef_table <- as.data.frame(s$coefficients)
+write.csv(coef_table, "./output/table5.csv", row.names = TRUE)
+
+# GLM to compare the mating success of bafflers and callers in across-bush experiments
+# mod <- glm(mated ~ tactic, 
+#            family = binomial, 
+#            data = data_two_males_baffler_across)
+# 
+# s <- summary(mod)
+# coef_table <- as.data.frame(s$coefficients)
+
+
 ## Fig. 5b: Plots for Across-Bush Perceived SPL ####
 # import data
 suppl_ab <- read.csv("./suppl_across_bush_baffler.csv", stringsAsFactors = T)
@@ -730,6 +805,386 @@ plot_percSPL <- ggplot(perc_long, aes(x = ART, y = SPL, fill =ART)) +
         axis.text.y = element_text(size = 14))
 
 ggsave("./plots/fig5b.png", plot = plot_percSPL , width = 10, height = 7)
+
+
+## Table 6, 7 & Fig. 6: Effect of Initial Distance and Tactic on Male Mating Probability ####
+
+## Proportion tests for estimating spatial effects on responses
+## Comparing mating success between within-bush and across-bush experiments
+
+dataset <- read.csv("data_mating_success_all_tactics.csv")
+
+df_lone_silent <- dataset %>%
+  filter(tactic == "silent",
+         treatment == "single_male")
+
+df_silent_satellite <- dataset %>%
+  filter(tactic == "silent",
+         treatment == "two_males_caller")
+
+df_lone_caller <- dataset %>%
+  filter(tactic == "call",
+         treatment == "single_male")
+
+df_caller_w_satellite <- dataset %>%
+  filter(tactic == "call",
+         treatment == "two_males_caller")
+
+run_prop_test <- function(df, expt) {
+  
+  estimator <- df %>%
+    group_by(experiment) %>%
+    summarise(
+      success = sum(mated == 1),
+      total = n(),
+      .groups = "drop"
+    )
+  
+  test <- prop.test(estimator$success, estimator$total)
+  
+  data.frame(
+    comparison = expt,
+    mated_across = estimator$success[1],
+    total_across = estimator$total[1],
+    mated_within = estimator$success[2],
+    total_within = estimator$total[2],
+    prop1 = estimator$success[1] / estimator$total[1],
+    prop2 = estimator$success[2] / estimator$total[2],
+    chi_sq_statistic = test$statistic,
+    p_value = test$p.value
+  )
+}
+test1 <- run_prop_test(df_lone_silent, "lone_silent")
+test2 <- run_prop_test(df_silent_satellite, "silent_satellite")
+test3 <- run_prop_test(df_lone_caller, "lone_caller")
+test4 <- run_prop_test(df_caller_w_satellite, "caller_with_satellite")
+
+final_results <- bind_rows(test1, test2, test3, test4)
+
+write.csv(final_results, "./output/spatial_responses_prop_tests.csv", row.names = FALSE)
+
+# Table 6: Effect of initial distance to female on mating success of silent and satellite males ####
+dataset <- read.csv('data_summary_virgin_female_same_bush.csv')
+dataset<- filter(dataset,plant_id!='Plant_03') 
+dataset$tactic <-ifelse(dataset$tactic=='call','caller',dataset$tactic)
+dataset <- dataset %>%
+  mutate(tactic = case_when(
+    treatment == 'two_males' & tactic == 'silent' ~ "satellite",
+    treatment == 'two_males' & tactic == 'caller' ~ "caller with satellite",
+    TRUE ~ tactic
+  ))
+dataset$tactic <- as.factor(dataset$tactic)
+
+data_silent_satellite <- filter(dataset,tactic =='silent' | tactic=='satellite' ) 
+data_caller_w_satellite <- filter (dataset,tactic== 'caller' | tactic == 'caller with satellite')
+
+data_silent_satellite <- data_silent_satellite %>%
+  left_join(
+    data_caller_w_satellite %>%
+      dplyr::select(exp_ids, partner_maleid = maleid),
+    by = "exp_ids"
+  )
+data_caller_w_satellite <- data_caller_w_satellite %>%
+  left_join(
+    data_silent_satellite %>%
+      dplyr::select(exp_ids, partner_maleid = maleid),
+    by = "exp_ids"
+  )
+data_silent_satellite$tactic <- relevel(data_silent_satellite$tactic, ref = "silent")
+data_silent_satellite$partner_maleid <- ifelse(data_silent_satellite$tactic=='silent','no_partner',data_silent_satellite$partner_maleid)
+mod1 <- glmer(mated ~ tactic * initial_dist_to_female + (1|maleid) + (1|partner_maleid),
+              family = binomial(link = "logit"),
+              data = data_silent_satellite )
+summary(mod1)
+mod1 <- glmer(mated ~ tactic * initial_dist_to_female + (1|maleid),
+              family = binomial(link = "logit"),
+              data = data_silent_satellite )
+s <- summary(mod1)
+coef_table <- as.data.frame(s$coefficients)
+write.csv(coef_table, "./output/table6.csv", row.names = TRUE)
+
+
+pred_link <- stats::predict(mod1, type = "link", se.fit = TRUE)
+fit <- pred_link$fit
+se  <- pred_link$se.fit
+
+data_silent_satellite$predicted <- plogis(fit)
+data_silent_satellite$ci_lower  <- plogis(fit - 1.96 * se)
+data_silent_satellite$ci_upper  <- plogis(fit + 1.96 * se)
+
+dat_bubble <- data_silent_satellite %>%
+  group_by(tactic, initial_dist_to_female, mated) %>%
+  summarise(count = n(), .groups = 'drop')
+
+# Fig 6a. Effect of distance to female and tactic on mating success of silent and satellite males ####
+p1 <- ggplot() +
+  # Raw observed data as colored, semi-transparent bubbles
+  geom_point(data = dat_bubble,
+             aes(x = initial_dist_to_female,
+                 y = mated,
+                 size = count,
+                 color = tactic),
+             alpha = 0.6) +  # transparency for overlap visibility
+  
+  # Confidence intervals around predicted probabilities
+  geom_errorbar(data = data_silent_satellite,
+                aes(x = initial_dist_to_female,
+                    ymin = ci_lower,
+                    ymax = ci_upper,
+                    color = tactic),
+                width = 0.15, size = 1.2, alpha = 0.7) +
+  
+  # Predicted points joined by lines
+  geom_line(data = data_silent_satellite,
+            aes(x = initial_dist_to_female,
+                y = predicted,
+                color = tactic,
+                group = tactic),
+            size = 2) +
+  
+  # Predicted points themselves
+  geom_point(data = data_silent_satellite,
+             aes(x = initial_dist_to_female,
+                 y = predicted,
+                 color = tactic),
+             size = 3) +
+  
+  # Bubble size legend
+  scale_size_continuous(
+    name = "Number of \nobservations",
+    breaks = c(2, 4, 6, 8),
+    range = c(3, 12),
+    limits = c(1, max(dat_bubble$count, na.rm = TRUE))
+  ) +
+  
+  labs(x = 'Distance to female (au)',
+       y = 'Mating success',
+       color = 'Tactic') +
+  theme_classic(base_size = 25) +
+  guides(
+    color = guide_legend(order = 1),   # Tactic (color) on top
+    size  = guide_legend(order = 2)    # Number of observations below
+  )
+
+
+
+# Table 7: Effect of initial distance to female on mating success of callers and callers with satellites. ####
+
+data_caller_w_satellite$tactic <- factor(
+  data_caller_w_satellite$tactic,
+  levels = c("caller", "caller with satellite"),
+  labels = c("caller", "caller with\nsatellite")
+)
+
+data_caller_w_satellite$partner_maleid <- ifelse(data_caller_w_satellite$tactic=='caller','no_partner',data_caller_w_satellite$partner_maleid)
+mod1 <- glmer(mated ~ tactic * initial_dist_to_female + (1|maleid) + (1|partner_maleid) ,
+              family = binomial(link = "logit"),
+              data = data_caller_w_satellite)
+summary(mod1)
+mod1 <- glmer(mated ~ tactic * initial_dist_to_female + (1|maleid)  ,
+              family = binomial(link = "logit"),
+              data = data_caller_w_satellite)
+# Model summary
+summary(mod1)
+s <- summary(mod1)
+coef_table <- as.data.frame(s$coefficients)
+write.csv(coef_table, "./output/table7.csv", row.names = TRUE)
+
+pred_link <- stats::predict(mod1, type = "link", se.fit = TRUE)
+fit <- pred_link$fit
+se  <- pred_link$se.fit
+
+data_caller_w_satellite$predicted <- plogis(fit)
+data_caller_w_satellite$ci_lower  <- plogis(fit - 1.96 * se)
+data_caller_w_satellite$ci_upper  <- plogis(fit + 1.96 * se)
+
+dat_bubble <- data_caller_w_satellite %>%
+  group_by(tactic, initial_dist_to_female, mated) %>%
+  summarise(count = n(), .groups = 'drop')
+
+# Fig 6b. Effect of distance to female and tactic on mating success  of callers and callers with satellite. ####
+p2 <- ggplot() +
+  # Raw observed data as colored, semi-transparent bubbles
+  geom_point(data = dat_bubble,
+             aes(x = initial_dist_to_female,
+                 y = mated,
+                 size = count,
+                 color = tactic),
+             alpha = 0.6) +  
+  
+  # Confidence intervals around predicted probabilities
+  geom_errorbar(data = data_caller_w_satellite,
+                aes(x = initial_dist_to_female,
+                    ymin = ci_lower,
+                    ymax = ci_upper,
+                    color = tactic),
+                width = 0.15, size = 1.2, alpha = 0.7) +
+  
+  # Predicted points joined by lines
+  geom_line(data = data_caller_w_satellite,
+            aes(x = initial_dist_to_female,
+                y = predicted,
+                color = tactic,
+                group = tactic),
+            size = 2) +
+  
+  # Predicted points themselves
+  geom_point(data = data_caller_w_satellite,
+             aes(x = initial_dist_to_female,
+                 y = predicted,
+                 color = tactic),
+             size = 3) +
+  
+  # Bubble size legend
+  scale_size_continuous(
+    name = "Number of \nobservations",
+    breaks = c(2, 4, 6, 8),
+    range = c(3, 12),
+    limits = c(1, max(dat_bubble$count, na.rm = TRUE))
+  ) +
+  
+  labs(x = 'Distance to female (au)',
+       y = 'Mating success',
+       color = 'Tactic') +
+  theme_classic(base_size = 25) +
+  guides(
+    color = guide_legend(order = 1),   
+    size  = guide_legend(order = 2)    
+  )
+
+# Fig. 6: Combining plots 6a and 6b.
+final_plot <- p1 + p2 +
+  plot_annotation(tag_levels = 'a') &
+  theme(
+    plot.tag = element_text(face = "bold", size = 32),
+    plot.tag.position = c(0.02, 0.98)  
+  )
+
+final_plot
+
+ggsave(
+  filename = "./plots/fig6.png",
+  plot = final_plot,
+  device = "tiff",
+  width = 18,
+  height = 8,
+  units = "in",
+  dpi = 300,
+  compression = "lzw"   # recommended for journals
+)
+
+
+# Fig. 7a: Female Acoustic Choice as a function of relative distance of male from female ####
+acoustic_choice <- suppl_ab %>% 
+  subset(Female_AcousticChoice != "NONE" & !is.na(DistanceFromFemale_Male2_cm)) %>% # removing trial which doesn't have distance data
+  mutate(Decision = ifelse(Female_AcousticChoice == "Male1", 1,0)) 
+plot_acoustic_choice <- ggplot(acoustic_choice,
+                               aes(x = Difference_Distance_cm, y = Decision)) +
+  geom_jitter(height = 0.05, width = 0.05,
+              alpha = 0.6, size = 2, color = "black") +
+  
+  geom_smooth(method = "glm",
+              method.args = list(family = "binomial"),
+              se = TRUE,
+              color = "black",
+              size = 2,
+              fill = "grey70",
+              alpha = 0.4) +
+  
+  scale_y_continuous(limits = c(-0.2, 1.2),
+                     breaks = seq(0, 1, 0.2)) +
+  
+  labs(x = "Relative distance to female\n(Baffler − Caller, cm)",
+       y = "Female acoustic choice\n(Baffler = 1, Caller = 0)") +
+  
+  theme_classic(base_size = 25) +
+  theme(
+    axis.title = element_text(size = 25),
+    axis.text  = element_text(size = 22)
+  )
+
+# Fit the binomial logistic regression model
+binomial_model <- glm(Decision ~ Difference_Distance_cm, data = acoustic_choice, family = binomial)
+
+# Fig. 7b: Comparing distance from female of bafflers and callers ####
+distance <- suppl_ab %>% 
+  subset(!is.na(DistanceFromFemale_Male2_cm))  # removing trial which doesn't have distance data
+
+distance <- distance[,c(1,5,9)] # selecting requisite columns
+colnames(distance) <- c("Trial_ID", "Baffler", "Caller")
+
+dist_long <- distance %>%
+  pivot_longer(cols = -Trial_ID, names_to = "ART", values_to = "Dist")
+
+plot_dist <- ggplot(dist_long,
+                    aes(x = ART, y = Dist, color = ART)) +
+  
+  geom_boxplot(alpha = 0.6,
+               width = 0.5,
+               outlier.shape = NA,
+               size = 1.5) +
+  
+  geom_line(aes(group = Trial_ID),
+            color = "black",
+            alpha = 0.5,
+            size = 1) +
+  
+  geom_point(size = 2.5,
+             alpha = 0.7,
+             color = "black") +
+  
+  scale_color_manual(values = c("#E69F00", "#56B4E9")) +
+  
+  labs(x = "Tactic",
+       y = "Distance from female (cm)",
+       color = "Tactic") +
+  
+  theme_classic(base_size = 25) +
+  theme(
+    axis.title = element_text(size = 25),
+    axis.text  = element_text(size = 22),
+    legend.position = "none"  
+  )
+
+
+final_plot <- plot_acoustic_choice + plot_dist +
+  plot_layout(ncol = 2) +
+  plot_annotation(tag_levels = 'a') &
+  theme(
+    plot.tag = element_text(face = "bold", size = 32),
+    plot.tag.position = c(0.02, 0.98)
+  )
+
+final_plot
+ggsave("./plots/fig7.png", plot = final_plot,
+       width = 12, height = 8, dpi = 300)
+
+# Paired t-test for comparing the difference in perceived SPL of callers and bafflers for female
+test1 <- t.test(suppl_ab$Perceived_SPL_Male1_dB, suppl_ab$Perceived_SPL_Male2_dB, paired = TRUE)
+
+# Paired t-test to compare distance from female of callers and bafflers in across-bush experiments
+test2 <- t.test(suppl_ab$DistanceFromFemale_Male1_cm, suppl_ab$DistanceFromFemale_Male2_cm, paired = TRUE)
+
+
+## Output the paired t-test results as a .csv file
+t.test.results <- data.frame(
+  test = c("Test 1: Perceived SPL (dB)", "Test 2: Distance from female (cm)"),
+  t_statistic = c(test1$statistic, test2$statistic),
+  df = c(test1$parameter, test2$parameter),
+  p_value = c(test1$p.value, test2$p.value),
+  difference = c(test1$estimate, test2$estimate),
+  CI_low = c(test1$conf.int[1], test2$conf.int[1]),
+  CI_high = c(test1$conf.int[2], test2$conf.int[2])
+)
+
+write.csv(t.test.results, "./output/paired_t_test_results.csv", row.names = FALSE)
+
+
+
+###############################################################################################
+#                                Supplementary plots                                          #
+###############################################################################################
+
 
 ## Fig. S2: Plots for Within-bush calling effort ####
 dataset1 <- read.csv('data_summary_virgin_female_same_bush.csv')
@@ -770,7 +1225,7 @@ table(dat$number_of_scans_called==1) #sample size
 
 
 ## Fig. S4a: Plots for Within-bush Silent Strategies (Mated) ####
-
+dataset <- within_bush_bootstrap_CI # storing plotting data in a dataframe
 dat_silentM <- filter(dataset,dataset$Treatment == 'Within bush', dataset$Female.mating.status == 'Mated',
                       dataset$Strategy == "Silent")
 
@@ -798,8 +1253,12 @@ plot_silentM <- dat_silentM %>%
 
 ggsave("./plots/figS4A.png", plot = plot_silentM , width = 10, height = 7)
 
-## Fig. S4b: Plots for Within-bush Calling Strategies (Mated)####
+#Proportion test for difference between silent and satellites
+# prop.test(c(0,2), c(9,14), p = NULL, alternative = "two.sided",
+#           correct = TRUE)
 
+## Fig. S4b: Plots for Within-bush Calling Strategies (Mated)####
+dataset <- within_bush_bootstrap_CI
 dat_callM <- filter(dataset,dataset$Treatment == 'Within bush', dataset$Female.mating.status == 'Mated',
                     dataset$Strategy == "Calling")
 
@@ -826,98 +1285,15 @@ plot_callM <- dat_callM %>%
 
 ggsave("./plots/figS4B.png", plot = plot_callM , width = 10, height = 7)
 
-
-## Table 3 & Fig. S5: Effect of Initial Distance and Tactic on Male Mating Probability ####
-
-## Table 3: Results of the binomial GLM for effect of ART and distance on 
-#                                                 mating success (Within-Bush)
-
-dataset <- read.csv('data_summary_virgin_female_same_bush.csv')
-dataset<- filter(dataset,plant_id!='Plant_03') 
-dataset <- dataset %>%
-  mutate(tactic = case_when(
-    treatment == 'two_males' & tactic == 'silent' ~ "satellite",
-    treatment == 'two_males' & tactic == 'caller' ~ "caller with satellite",
-    TRUE ~ tactic
-  ))
-# dat <- filter (dataset, tactic == 'caller' | tactic =='silent')
-dataset$tactic <- as.factor(dataset$tactic)
-dataset$tactic <- relevel(dataset$tactic, ref = "silent")
-mod <- glm(mated ~ tactic * initial_dist_to_female,
-           family = binomial(link = "logit"),
-           data = dataset)
-
-# Model summary
-s <- summary(mod)
-Anova(mod, type = "III")
-# hist(residuals(mod))
-
-coef_table <- as.data.frame(s$coefficients)
-write.csv(coef_table, "./output/table3.csv", row.names = TRUE)
-
-pred_link <- stats::predict(mod, type = "link", se.fit = TRUE)
-fit <- pred_link$fit
-se  <- pred_link$se.fit
-
-dataset$predicted <- plogis(fit)
-dataset$ci_lower  <- plogis(fit - 1.96 * se)
-dataset$ci_upper  <- plogis(fit + 1.96 * se)
-
-dat_bubble <- dataset %>%
-  group_by(tactic, initial_dist_to_female, mated) %>%
-  summarise(count = n(), .groups = 'drop')
-
-# Fig S5. Supplementary figure for effect of distance to female and tactic on mating success 
-my_plot <- ggplot() +
-  # Raw observed data as colored, semi-transparent bubbles
-  geom_point(data = dat_bubble,
-             aes(x = initial_dist_to_female,
-                 y = mated,
-                 size = count,
-                 color = tactic),
-             alpha = 0.6) +  # transparency for overlap visibility
-  
-  # Confidence intervals around predicted probabilities
-  geom_errorbar(data = dataset,
-                aes(x = initial_dist_to_female,
-                    ymin = ci_lower,
-                    ymax = ci_upper,
-                    color = tactic),
-                width = 0.15, size = 1.2, alpha = 0.7) +
-  
-  # Predicted points joined by lines
-  geom_line(data = dataset,
-            aes(x = initial_dist_to_female,
-                y = predicted,
-                color = tactic,
-                group = tactic),
-            size = 2) +
-  
-  # Predicted points themselves
-  geom_point(data = dataset,
-             aes(x = initial_dist_to_female,
-                 y = predicted,
-                 color = tactic),
-             size = 3) +
-  
-  # Bubble size legend
-  scale_size_continuous(
-    name = "Number of observations",
-    breaks = c(2, 4, 6, 8),
-    range = c(3, 12),
-    limits = c(1, max(dat_bubble$count, na.rm = TRUE))
-  ) +
-  
-  labs(x = 'Distance to female (au)',
-       y = 'Mating success',
-       color = 'Tactic') +
-  theme_classic(base_size = 25)
+#Proportion test for difference between callers and callers with satellites
+# prop.test(c(1,5), c(14,21), p = NULL, alternative = "two.sided",
+#           correct = TRUE)
 
 
-ggsave("./plots/figS5.png", plot = my_plot, width = 12, height = 8, units = "in", dpi = 300)
 
 
-## Fig. S6, S7: Plots for Pilot Experiments ####
+
+## Fig. S5, S6: Plots for Pilot Experiments ####
 # import data
 pilot <- read.csv("./suppl_pilot.csv", stringsAsFactors = T)
 
@@ -939,7 +1315,7 @@ plot_pilot_1 <- ggplot(pilot_1, aes(x = Perceived_SPL_Male12_dB)) +
   scale_x_continuous(breaks = seq(min(pilot$Perceived_SPL_Male12_dB), max(pilot$Perceived_SPL_Male12_dB), by = 5)) +
   scale_y_continuous(breaks = seq(0, max(table(cut(pilot$Perceived_SPL_Male12_dB, breaks = 50))), by = 10))
 
-ggsave("./plots/figS6.png", plot = plot_pilot_1 , width = 10, height = 7)
+ggsave("./plots/figS5.png", plot = plot_pilot_1 , width = 10, height = 7)
 
 
 pilot_2 <- pilot %>% 
@@ -959,65 +1335,12 @@ plot_pilot_2 <- ggplot(pilot_2, aes(x = Distance_bw_plants12_cm)) +
     axis.text.y = element_text(size = 12, face = "bold")
   ) 
 
-ggsave("./plots/figS7.png", plot = plot_pilot_2 , width = 10, height = 7)
+ggsave("./plots/figS6.png", plot = plot_pilot_2 , width = 10, height = 7)
 
 
-## Fig. S8, S9, S10: Supplementary Plots for Across-Bush Experiments ####
+## Fig. S7: Supplementary Plots for Across-Bush Experiments ####
 
-# Fig. S8: Comparing distance from female of bafflers and callers
-distance <- suppl_ab %>% 
-  subset(!is.na(DistanceFromFemale_Male2_cm))  # removing trial which doesn't have distance data
-
-distance <- distance[,c(1,5,9)] # selecting requisite columns
-colnames(distance) <- c("Trial_ID", "Baffler", "Caller")
-
-dist_long <- distance %>%
-  pivot_longer(cols = -Trial_ID, names_to = "ART", values_to = "Dist")
-
-plot_dist <- ggplot(dist_long, aes(x = ART, y = Dist, fill =ART)) +
-  geom_boxplot(alpha = 0.85) +
-  scale_fill_manual(values = c("#E69F00","#56B4E9", "black")) +
-  labs(fill = "",
-       x = "Tactic",
-       y = "Distance from female (cm)"
-  ) +
-  geom_line(aes(group = Trial_ID), color = "black", alpha = 0.7) + 
-  geom_point(color = "black", size = 1.5, alpha = 0.5)+
-  theme_minimal()+
-  theme(axis.title = element_text(size = 14),
-        legend.title = element_text(size = 14),  
-        legend.text = element_text(size = 14),
-        axis.text.x = element_text(size = 14),
-        axis.text.y = element_text(size = 14))
-
-lm.dist <- lm(Dist~ART, data = dist_long)
-
-ggsave("./plots/figS8.png", plot = plot_dist , width = 10, height = 7)
-
-
-# Fig. S9: Female Acoustic Choice as a function of relative distance of male from female
-acoustic_choice <- suppl_ab %>% 
-  subset(Female_AcousticChoice != "NONE" & !is.na(DistanceFromFemale_Male2_cm)) %>% # removing trial which doesn't have distance data
-  mutate(Decision = ifelse(Female_AcousticChoice == "Male1", 1,0)) 
-
-plot_acoustic_choice <- ggplot(acoustic_choice, aes(x = Difference_Distance_cm, y = Decision)) +
-  geom_jitter(height = 0.05, width = 0.05, alpha = 0.8, color = "black") +
-  geom_smooth(method = "glm", method.args = list(family = "binomial"),
-              se = TRUE, color = "red") +
-  scale_y_continuous(limits = c(-0.2, 1.2), breaks = seq(0,1, 0.1)) +
-  labs(x = "Relative distance to female (Baffler − Caller, cm)", y = "Female Acoustic Choice (Baffler = 1, Caller = 0)") +
-  theme_minimal()+
-  theme(axis.title.x = element_text(size = 14),
-        axis.title.y = element_text(size = 14), 
-        axis.text.x = element_text(size = 14), 
-        axis.text.y = element_text(size = 14))
-
-# Fit the binomial logistic regression model
-binomial_model <- glm(Decision ~ Difference_Distance_cm, data = acoustic_choice, family = binomial)
-
-ggsave("./plots/figS9.png", plot = plot_acoustic_choice , width = 10, height = 7)
-
-# Fig. S10: Female Decision Latency as a function of relative perceived loudness of males 
+# Fig. S7: Female Decision Latency as a function of relative perceived loudness of males 
 latency <- suppl_ab %>% 
   subset(Female_AcousticChoice != "NONE") 
 
@@ -1037,33 +1360,13 @@ plot_latency <- ggplot(latency, aes(x = Difference_PerceivedSPL_dB, y = Decision
 
 lm.latency <- lm(Decision_Latency_min ~ Difference_PerceivedSPL_dB, data = latency)
 
-ggsave("./plots/figS10.png", plot = plot_latency , width = 10, height = 7)
+ggsave("./plots/figS7.png", plot = plot_latency , width = 10, height = 7)
 
 
-## Supplementary E: Effect of re-use of males across experimental trials ####
-dataset <- read.csv("data_mating_success_wo_repeating_males_all_tactics_same_bush.csv")
-dataset$tactic <- ifelse(dataset$tactic=='call','caller',dataset$tactic)
-dataset <- dataset %>%
-  mutate(tactic = case_when(
-    treatment == 'two_males_baffler' & tactic == 'silent' ~ "satellite with baffler",
-    treatment == 'two_males_baffler' & tactic == 'baffling' ~ "baffler with satellite",
-    treatment == 'two_males_caller' & tactic == 'silent' ~ "satellite with caller",
-    treatment == 'two_males_caller' & tactic == 'caller' ~ "caller with satellite",
-    TRUE ~ tactic
-  ))
-dataset$tactic <- as.factor (dataset$tactic)
-dataset$tactic <- relevel (dataset$tactic, ref = "silent")
-mod <- glm (mated~tactic,family = binomial, data=dataset)
-s <- summary(mod)
-Anova (mod, type='III')
 
-coef_table <- as.data.frame(s$coefficients)
-write.csv(coef_table, "./output/tableS1.csv", row.names = TRUE)
 
-## Fig. S11, S12: Plots for Calling Propensity as a function of body size ####
-
-# Fig. S11: Body size vs calling probability (single and two males) 
-
+## Fig. S8, S9: Plots for Calling Propensity as a function of body size ####
+# Fig. S10: Body size vs calling probability (single and two males) 
 d1<- read.csv('data_across_bush_single_male.csv')
 d2 <- read.csv('data_across_bush_two_male.csv')
 dat<- rbind(d1,d2)
@@ -1071,7 +1374,7 @@ dat$tactic_binary <- ifelse(dat$tactic=='call',1,0)
 dat <- dat[!is.na(dat$Mean_body_length_male.mm.), ]
 
 mod <- lm(tactic_binary~Mean_body_length_male.mm., data = dat)
-# summary(mod)
+summary(mod)
 
 
 dat$predicted <- predict(mod, type = "response")
@@ -1084,16 +1387,16 @@ my_plot <- dat%>%
   geom_line(aes(y=predicted),size=2) +
   #geom_errorbar(aes(ymin=ci_min, ymax=ci_max), width=0.3,size=1,col='blue') +
   theme_classic(base_size = 25)
-ggsave("./plots/figS11.png", plot = my_plot, width = 12, height = 8, units = "in", dpi = 300)
+ggsave("./plots/figS8.png", plot = my_plot, width = 12, height = 8, units = "in", dpi = 300)
 
-# Fig. S12: Body size vs calling probability for across-bush trials (single male)
+# Fig. S9: Body size vs calling probability for across-bush trials (single male)
 d1<- read.csv('data_across_bush_single_male.csv')
 dat<- d1
 dat$tactic_binary <- ifelse(dat$tactic=='call',1,0)
 dat <- dat[!is.na(dat$Mean_body_length_male.mm.), ]
 
 mod <- lm(tactic_binary~Mean_body_length_male.mm., data = dat)
-# summary(mod)
+summary(mod)
 
 
 dat$predicted <- predict(mod, type = "response")
@@ -1106,10 +1409,10 @@ my_plot <- dat%>%
   geom_line(aes(y=predicted),size=2) +
   #geom_errorbar(aes(ymin=ci_min, ymax=ci_max), width=0.3,size=1,col='blue') +
   theme_classic(base_size = 25)
-ggsave("./plots/figS12.png", plot = my_plot, width = 12, height = 8, units = "in", dpi = 300)
+ggsave("./plots/figS9.png", plot = my_plot, width = 12, height = 8, units = "in", dpi = 300)
 
 
-## Fig. S13: Plot for Body Size comparison between bafflers and callers ####
+## Fig. S10: Plot for Body Size comparison between bafflers and callers ####
 # import data
 body_size <- read.csv("./suppl_body_size_baffler.csv", stringsAsFactors = T)
 
@@ -1131,10 +1434,10 @@ plot_body_size <- ggplot(body_size, aes(x = Tactic, y = Body_Length_mm, fill = T
 
 lm.bodysize <- lm(Body_Length_mm~Tactic , data = body_size)
 
-ggsave("./plots/figS13.png", plot = plot_body_size , width = 10, height = 7)
+ggsave("./plots/figS10.png", plot = plot_body_size , width = 10, height = 7)
 
 
-## Fig. S14: Plot for Baffling Propensity as a function of body size  ####
+## Fig. S11: Plot for Baffling Propensity as a function of body size  ####
 # import data
 baff_prop <- read.csv("./suppl_baffling_propensity.csv", stringsAsFactors = T)
 
@@ -1159,7 +1462,7 @@ plot_baff_prop <- ggplot(baff_prop, aes(x = Body_Length_mm, y = baff_probability
 
 lm.baffprop <- lm(baff_probability~Body_Length_mm, data = baff_prop)
 
-ggsave("./plots/figS14.png", plot = plot_baff_prop , width = 10, height = 7)
+ggsave("./plots/figS11.png", plot = plot_baff_prop , width = 10, height = 7)
 
 ### Exporting output as .CSV files ####
 
