@@ -6,7 +6,7 @@ Click Source in RStudio to run the entire script.
 
 Manual Version Number: v1.6
 
-Input: 15 .csv files containing data from experimental trials 
+Input: 14 .csv files containing data from experimental trials 
 
 Output: A folder ('output') that includes 10 .csv files containing 95% bootstrapped
 confidence intervals, the seven GLM result tables (1, 2, 3, 4, 5, 6, 7), and the results 
