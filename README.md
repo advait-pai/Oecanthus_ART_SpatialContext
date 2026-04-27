@@ -27,9 +27,7 @@ Alternative reproductive tactics are observed in many animal species. Typically,
 -   The `data_mating_success_all_tactics_same_bush.csv` file contains the collated data for mating success of all males in within-bush experiments. It is used to run the analyses shown in table 1.
 
 -   The `data_mating_success_all_tactics.csv` file contains the collated data for mating success of all males in within-bush and across-bush experiments, and is used to compare the same between them.
-
--   The `data_mating_success_wo_repeating_males_all_tactics_same_bush.csv` file contains the collated data for mating success of all males, including males used more than once, in within-bush experiments.
-
+  
 -   The `suppl_pilot.csv` file contains the data for the pilot across-bush experiments conducted with baffling males to standardize the experimental setup. This can be used to make figures S5 and S6.
 
 -   The `suppl_across_bush_baffler.csv` file contains supplementary data for the across-bush experiments with bafflers and callers. It includes information about the relative distances and perceived loudness of bafflers and callers with respect to the the female and also the female choice parameters like decision latency and movement. It can be used to make figures 5b, 7a, 7b, and S7.
