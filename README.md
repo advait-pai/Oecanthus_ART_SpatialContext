@@ -8,7 +8,7 @@ Alternative reproductive tactics are observed in many animal species. Typically,
 
 ## Guide to the Repository
 
--   The `code.R` (v1.6, manual version number) Rscript contains the entire R code that was used for the analysis and visualization of the data in the associated manuscript. More about the code and its execution later.
+-   The `code.R` (v1.7, manual version number) Rscript contains the entire R code that was used for the analysis and visualization of the data in the associated manuscript. More about the code and its execution later.
 
 -   The `data_virgin_female_same_bush.csv` file contains the data for the within-bush experimental trials conducted to estimate the mating success of callers, satellites, and silent males when virgin females were used. Call effort data for figure S2 in supplementary document is extracted from this dataset. Data for parts of figures 3a and 3b is contained in this file.
 
@@ -27,10 +27,10 @@ Alternative reproductive tactics are observed in many animal species. Typically,
 -   The `data_mating_success_all_tactics_same_bush.csv` file contains the collated data for mating success of all males in within-bush experiments. It is used to run the analyses shown in table 1.
 
 -   The `data_mating_success_all_tactics.csv` file contains the collated data for mating success of all males in within-bush and across-bush experiments, and is used to compare the same between them.
-  
+
 -   The `suppl_pilot.csv` file contains the data for the pilot across-bush experiments conducted with baffling males to standardize the experimental setup. This can be used to make figures S5 and S6.
 
--   The `suppl_across_bush_baffler.csv` file contains supplementary data for the across-bush experiments with bafflers and callers. It includes information about the relative distances and perceived loudness of bafflers and callers with respect to the the female and also the female choice parameters like decision latency and movement. It can be used to make figures 5b, 7a, 7b, and S7.
+-   The `suppl_across_bush_baffler.csv` file contains supplementary data for the across-bush experiments with bafflers and callers. It includes information about the relative distances and perceived loudness of bafflers and callers with respect to the the female and also the female choice parameters like decision latency and movement. It can be used to make figures 5b, S7, S12a & S12b.
 
 -   The `suppl_body_size_baffler.csv` file contains body length data (in mm) for bafflers and callers used in the across-bush experimental trials. It can be used to make figure S10.
 
