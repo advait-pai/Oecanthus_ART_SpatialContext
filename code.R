@@ -4,7 +4,7 @@ of male crickets in various spatio-acoustic scenarios.
 
 Click Source in RStudio to run the entire script.
 
-Manual Version Number: v1.6
+Manual Version Number: v1.7
 
 Input: 14 .csv files containing data from experimental trials 
 
@@ -763,7 +763,8 @@ plot_baff_across <- dat_baff_across %>%
 
 ggsave("./plots/fig5a.png", plot = plot_baff_across , width = 10, height = 7)
 
-# GLMM to compare the mating success of bafflers and callers in across-bush experiments
+
+## Table 5: Results of binomial GLMM to compare the mating success of bafflers and callers in across-bush experiments ####
 mod <- glmer (mated~tactic + (1|maleid), family = binomial, data=data_two_males_baffler_across)
 # summary(mod)
 s <- summary(mod)
@@ -1074,117 +1075,7 @@ ggsave(
 )
 
 
-# Fig. 7a: Female Acoustic Choice as a function of relative distance of male from female ####
-acoustic_choice <- suppl_ab %>% 
-  subset(Female_AcousticChoice != "NONE" & !is.na(DistanceFromFemale_Male2_cm)) %>% # removing trial which doesn't have distance data
-  mutate(Decision = ifelse(Female_AcousticChoice == "Male1", 1,0)) 
-plot_acoustic_choice <- ggplot(acoustic_choice,
-                               aes(x = Difference_Distance_cm, y = Decision)) +
-  geom_jitter(height = 0.05, width = 0.05,
-              alpha = 0.6, size = 2, color = "black") +
-  
-  geom_smooth(method = "glm",
-              method.args = list(family = "binomial"),
-              se = TRUE,
-              color = "black",
-              size = 2,
-              fill = "grey70",
-              alpha = 0.4) +
-  
-  scale_y_continuous(limits = c(-0.2, 1.2),
-                     breaks = seq(0, 1, 0.2)) +
-  
-  labs(x = "Relative distance to female\n(Baffler − Caller, cm)",
-       y = "Female acoustic choice\n(Baffler = 1, Caller = 0)") +
-  
-  theme_classic(base_size = 25) +
-  theme(
-    axis.title = element_text(size = 25),
-    axis.text  = element_text(size = 22)
-  )
-
-# Fit the binomial logistic regression model
-binomial_model <- glm(Decision ~ Difference_Distance_cm, data = acoustic_choice, family = binomial)
-
-# Fig. 7b: Comparing distance from female of bafflers and callers ####
-distance <- suppl_ab %>% 
-  subset(!is.na(DistanceFromFemale_Male2_cm))  # removing trial which doesn't have distance data
-
-distance <- distance[,c(1,5,9)] # selecting requisite columns
-colnames(distance) <- c("Trial_ID", "Baffler", "Caller")
-
-dist_long <- distance %>%
-  pivot_longer(cols = -Trial_ID, names_to = "ART", values_to = "Dist")
-
-plot_dist <- ggplot(dist_long,
-                    aes(x = ART, y = Dist, color = ART)) +
-  
-  geom_boxplot(alpha = 0.6,
-               width = 0.5,
-               outlier.shape = NA,
-               size = 1.5) +
-  
-  geom_line(aes(group = Trial_ID),
-            color = "black",
-            alpha = 0.5,
-            size = 1) +
-  
-  geom_point(size = 2.5,
-             alpha = 0.7,
-             color = "black") +
-  
-  scale_color_manual(values = c("#E69F00", "#56B4E9")) +
-  
-  labs(x = "Tactic",
-       y = "Distance from female (cm)",
-       color = "Tactic") +
-  
-  theme_classic(base_size = 25) +
-  theme(
-    axis.title = element_text(size = 25),
-    axis.text  = element_text(size = 22),
-    legend.position = "none"  
-  )
-
-
-final_plot <- plot_acoustic_choice + plot_dist +
-  plot_layout(ncol = 2) +
-  plot_annotation(tag_levels = 'a') &
-  theme(
-    plot.tag = element_text(face = "bold", size = 32),
-    plot.tag.position = c(0.02, 0.98)
-  )
-
-final_plot
-ggsave("./plots/fig7.png", plot = final_plot,
-       width = 12, height = 8, dpi = 300)
-
-# Paired t-test for comparing the difference in perceived SPL of callers and bafflers for female
-test1 <- t.test(suppl_ab$Perceived_SPL_Male1_dB, suppl_ab$Perceived_SPL_Male2_dB, paired = TRUE)
-
-# Paired t-test to compare distance from female of callers and bafflers in across-bush experiments
-test2 <- t.test(suppl_ab$DistanceFromFemale_Male1_cm, suppl_ab$DistanceFromFemale_Male2_cm, paired = TRUE)
-
-
-## Output the paired t-test results as a .csv file
-t.test.results <- data.frame(
-  test = c("Test 1: Perceived SPL (dB)", "Test 2: Distance from female (cm)"),
-  t_statistic = c(test1$statistic, test2$statistic),
-  df = c(test1$parameter, test2$parameter),
-  p_value = c(test1$p.value, test2$p.value),
-  difference = c(test1$estimate, test2$estimate),
-  CI_low = c(test1$conf.int[1], test2$conf.int[1]),
-  CI_high = c(test1$conf.int[2], test2$conf.int[2])
-)
-
-write.csv(t.test.results, "./output/paired_t_test_results.csv", row.names = FALSE)
-
-
-
-###############################################################################################
-#                                Supplementary plots                                          #
-###############################################################################################
-
+## Supplementary Plots ####
 
 ## Fig. S2: Plots for Within-bush calling effort ####
 dataset1 <- read.csv('data_summary_virgin_female_same_bush.csv')
@@ -1220,8 +1111,6 @@ median (dat$call_effort)
 mean(dat$call_effort)
 sd(dat$call_effort)
 table(dat$number_of_scans_called==1) #sample size
-
-
 
 
 ## Fig. S4a: Plots for Within-bush Silent Strategies (Mated) ####
@@ -1463,6 +1352,112 @@ plot_baff_prop <- ggplot(baff_prop, aes(x = Body_Length_mm, y = baff_probability
 lm.baffprop <- lm(baff_probability~Body_Length_mm, data = baff_prop)
 
 ggsave("./plots/figS11.png", plot = plot_baff_prop , width = 10, height = 7)
+
+# Fig. S12a: Female Acoustic Choice as a function of relative distance of male from female ####
+acoustic_choice <- suppl_ab %>% 
+  subset(Female_AcousticChoice != "NONE" & !is.na(DistanceFromFemale_Male2_cm)) %>% # removing trial which doesn't have distance data
+  mutate(Decision = ifelse(Female_AcousticChoice == "Male1", 1,0)) 
+plot_acoustic_choice <- ggplot(acoustic_choice,
+                               aes(x = Difference_Distance_cm, y = Decision)) +
+  geom_jitter(height = 0.05, width = 0.05,
+              alpha = 0.6, size = 2, color = "black") +
+  
+  geom_smooth(method = "glm",
+              method.args = list(family = "binomial"),
+              se = TRUE,
+              color = "black",
+              size = 2,
+              fill = "grey70",
+              alpha = 0.4) +
+  
+  scale_y_continuous(limits = c(-0.2, 1.2),
+                     breaks = seq(0, 1, 0.2)) +
+  
+  labs(x = "Relative distance to female\n(Baffler − Caller, cm)",
+       y = "Female acoustic choice\n(Baffler = 1, Caller = 0)") +
+  
+  theme_classic(base_size = 25) +
+  theme(
+    axis.title = element_text(size = 25),
+    axis.text  = element_text(size = 22)
+  )
+
+# Fit the binomial logistic regression model
+binomial_model <- glm(Decision ~ Difference_Distance_cm, data = acoustic_choice, family = binomial)
+
+# Fig. S12b: Comparing distance from female of bafflers and callers ####
+distance <- suppl_ab %>% 
+  subset(!is.na(DistanceFromFemale_Male2_cm))  # removing trial which doesn't have distance data
+
+distance <- distance[,c(1,5,9)] # selecting requisite columns
+colnames(distance) <- c("Trial_ID", "Baffler", "Caller")
+
+dist_long <- distance %>%
+  pivot_longer(cols = -Trial_ID, names_to = "ART", values_to = "Dist")
+
+plot_dist <- ggplot(dist_long,
+                    aes(x = ART, y = Dist, color = ART)) +
+  
+  geom_boxplot(alpha = 0.6,
+               width = 0.5,
+               outlier.shape = NA,
+               size = 1.5) +
+  
+  geom_line(aes(group = Trial_ID),
+            color = "black",
+            alpha = 0.5,
+            size = 1) +
+  
+  geom_point(size = 2.5,
+             alpha = 0.7,
+             color = "black") +
+  
+  scale_color_manual(values = c("#E69F00", "#56B4E9")) +
+  
+  labs(x = "Tactic",
+       y = "Distance from female (cm)",
+       color = "Tactic") +
+  
+  theme_classic(base_size = 25) +
+  theme(
+    axis.title = element_text(size = 25),
+    axis.text  = element_text(size = 22),
+    legend.position = "none"  
+  )
+
+
+final_plot <- plot_acoustic_choice + plot_dist +
+  plot_layout(ncol = 2) +
+  plot_annotation(tag_levels = 'a') &
+  theme(
+    plot.tag = element_text(face = "bold", size = 32),
+    plot.tag.position = c(0.02, 0.98)
+  )
+
+final_plot
+ggsave("./plots/figS12.png", plot = final_plot,
+       width = 12, height = 8, dpi = 300)
+
+# Paired t-test for comparing the difference in perceived SPL of callers and bafflers for female
+test1 <- t.test(suppl_ab$Perceived_SPL_Male1_dB, suppl_ab$Perceived_SPL_Male2_dB, paired = TRUE)
+
+# Paired t-test to compare distance from female of callers and bafflers in across-bush experiments
+test2 <- t.test(suppl_ab$DistanceFromFemale_Male1_cm, suppl_ab$DistanceFromFemale_Male2_cm, paired = TRUE)
+
+
+## Output the paired t-test results as a .csv file
+t.test.results <- data.frame(
+  test = c("Test 1: Perceived SPL (dB)", "Test 2: Distance from female (cm)"),
+  t_statistic = c(test1$statistic, test2$statistic),
+  df = c(test1$parameter, test2$parameter),
+  p_value = c(test1$p.value, test2$p.value),
+  difference = c(test1$estimate, test2$estimate),
+  CI_low = c(test1$conf.int[1], test2$conf.int[1]),
+  CI_high = c(test1$conf.int[2], test2$conf.int[2])
+)
+
+write.csv(t.test.results, "./output/paired_t_test_results.csv", row.names = FALSE)
+
 
 ### Exporting output as .CSV files ####
 
